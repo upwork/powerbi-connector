@@ -1,0 +1,13 @@
+﻿let Upwork.QueryProjects = (a as any) =>
+    let
+        _query = "query{projects{ contractId talentName categoryId hourlyRate completedMilestonesPrice }}",
+        graphqlRequest = [query = _query],
+		Upwork.GraphQLRequest = a[f],
+		Source = Json.Document(Upwork.GraphQLRequest(graphqlRequest, a[config])),
+        data = Source[data]
+	in
+		data
+
+in 
+	Upwork.QueryProjects
+	

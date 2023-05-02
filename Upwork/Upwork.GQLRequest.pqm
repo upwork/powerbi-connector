@@ -1,0 +1,28 @@
+﻿let 
+	Upwork.GraphQLRequest = 
+            (graphqlParams, 
+			config,
+            optional OrgId,
+            optional ManualErrorHandling,
+            optional delayInSecondsLocalParam
+            ) =>
+    let
+        delayinSecGlobalParam = config[delayinSecGlobalParam],
+        graphQLUrl = config[graphQLUrl],
+        method = "POST" ,
+        headers = [Accept="application/json"],
+        headerOrgId = if OrgId <> null then [#"X-Upwork-API-TenantId" = OrgId] else [],
+
+        queryString = Json.FromValue(graphqlParams),
+        options = [Headers = [#"Content-type" = "application/json"] & headers & headerOrgId, 
+                        Content = queryString] ,
+     
+        manualStatusHandling = if ManualErrorHandling = null then [] else ManualErrorHandling,
+        delayInSec = if delayInSecondsLocalParam = null then delayinSecGlobalParam else delayInSecondsLocalParam,
+
+        result = Function.InvokeAfter(()=>Web.Contents(graphQLUrl, manualStatusHandling & options),
+                    #duration(0,0,0, delayInSec))
+        in
+            result
+in 
+	Upwork.GraphQLRequest

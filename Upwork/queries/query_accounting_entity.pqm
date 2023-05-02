@@ -1,0 +1,16 @@
+let Upwork.QueryAccountingEntity = (a as any) =>
+    let
+        _query = "query AccountingEntity{ accountingEntity {id}}",
+        graphqlRequest = [query = _query],
+		Upwork.GraphQLRequest = a[f],
+		Source = Json.Document(Upwork.GraphQLRequest(graphqlRequest, a[config])),
+        data = Source[data],
+		accountingEntity = data[accountingEntity],
+		accountingEntityId = accountingEntity[id]
+	in
+		[
+			data = accountingEntityId
+		]
+
+in 
+	Upwork.QueryAccountingEntity

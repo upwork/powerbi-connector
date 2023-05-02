@@ -1,0 +1,12 @@
+﻿let Upwork.QueryCompanySelector = (a as any) =>
+    let
+        queryCompanySelector = "query  {   companySelector {     items {       title       organizationId       photoUrl       organizationRid       organizationType       organizationLegacyType       organizationEnterpriseType       legacyEnterpriseOrganization     }   } }",
+        graphqlRequest = [query = queryCompanySelector],
+		Upwork.GraphQLRequest = a[f],
+		Source = Json.Document(Upwork.GraphQLRequest(graphqlRequest, a[config])),
+		data = Source[data]
+	in
+		data
+
+in 
+	Upwork.QueryCompanySelector

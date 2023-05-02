@@ -1,0 +1,29 @@
+﻿let Upwork.QueryCompanyStaffs = (a as any) =>
+    let
+        _query = "query CompanyStaffs($offset: String, $limit: Int!) { organization { staffs{ totalCount edges{ node{ id user{  id  name  permissions(filter: {limit: $limit, offset:$offset, resourceType_eq:ORGANIZATION , actions_any: ""post_job""}){ edges{  node{  action  } }  } } activationStatus staffType creationDate } } } } }",
+        
+		 context = Record.FieldOrDefault(a, "ctx", []), 
+		 config = Record.FieldOrDefault(a, "config", []), 
+		 defaultPageSize =  Record.FieldOrDefault(config, "defaultPageSize", 100),
+		 _templimit = Record.FieldOrDefault(context, "first", defaultPageSize), 
+		 _limit = if _templimit > 50 then 50 else _templimit, //50 for max items per bulk request 
+         _offset = Record.FieldOrDefault(context, "after", "0"),
+		variable = [limit = _limit, offset = _offset],
+		graphqlRequest = [query = _query, variables = variable],
+		Upwork.GraphQLRequest = a[f],
+		result = Json.Document(Upwork.GraphQLRequest(graphqlRequest, a[config])),
+		Value = result[data],
+		organization = Value[organization],
+		staffs = organization[staffs],
+		totalCount = staffs[totalCount],
+		edges = staffs[edges],
+		lastNode = List.Last(edges),
+		lastNodeId = lastNode[node]?[id],
+		Source1 = Record.AddField(result, "totalCount", totalCount),
+		Source = Record.AddField(Source1, "offset", lastNodeId)
+	in
+		Source
+
+in 
+	Upwork.QueryCompanyStaffs
+	

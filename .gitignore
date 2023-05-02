@@ -1,0 +1,4 @@
+/Upwork/bin/Debug/*
+/Upwork/obj/*
+/.vs/*
+/Upwork/config_stg.json

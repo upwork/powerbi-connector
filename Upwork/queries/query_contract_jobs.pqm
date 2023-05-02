@@ -1,0 +1,24 @@
+﻿let Upwork.QueryContractJobs = (a as any) =>
+    let
+		_query = "query contracts($after: String, $first: Int!, $startDatePeriod: [String!], $endDatePeriod: [String!]) { organization { id clientOffers(offerByClientFilter:{commonFilter:{startDatePeriod_bt: $startDatePeriod, endDatePeriod_bt: $endDatePeriod}}, pagination: { after: $after, first: $first }) {totalCount edges { cursor node { contract { id   job { id classification { category { id  preferredLabel  } subCategory { id  preferredLabel } }  contractTerms { fixedPriceContractTerms { amount { rawValue currency displayValue } } } } } } } } } }",
+		context = Record.FieldOrDefault(a, "ctx", []), 
+		 config = Record.FieldOrDefault(a, "config", []), 
+		 defaultPageSize =  Record.FieldOrDefault(config, "defaultPageSize", 50),
+		 _first = Record.FieldOrDefault(context, "first", defaultPageSize), 
+         _after = Record.FieldOrDefault(context, "after", "0"),
+		 _firstVal = if _first > 50 then 50 else _first, //50 for max items per bulk request 
+		variable = [first = _first, after = _after],
+		graphqlRequest = [query = _query, variables = variable],
+		Upwork.GraphQLRequest = a[f],      
+		Contracts = Json.Document(Upwork.GraphQLRequest(graphqlRequest, a[config])),
+		data = Contracts[data],
+		organization = data[organization],
+		clientOffers = organization[clientOffers],
+		totalCount = clientOffers[totalCount],
+		Source = Record.AddField(Contracts, "totalCount", totalCount)
+	in
+		Source
+in 
+	Upwork.QueryContractJobs 
+
+

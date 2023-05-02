@@ -1,0 +1,13 @@
+﻿{
+  "baseUrl": "https://www.upwork.com",
+  "requestTokenUrl": "/api/v3/oauth2/token",
+  "authenticateUrl": "/ab/account-security/oauth2/authorize",
+  "clientId": "YOUR_CLIENT_ID",
+  "clientSecret": "YOUR_CLIENT_SECRET",
+  "defaultPageSize": 100,
+  "callbackUrl": "https://oauth.powerbi.com/views/oauthredirect.html",
+  "graphQLUrl": "https://api.upwork.com/graphql",
+  "delayinSecGlobalParam": 1,
+  "windowWidth": 1024,
+  "windowHeight": 720
+}

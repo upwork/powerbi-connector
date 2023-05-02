@@ -1,0 +1,57 @@
+﻿let Upwork.QueryContractTimeReport = (params as any) =>
+    let
+        _query = """
+            query timeReport($after: String, $first: Int!, $timeReportDate_bt: [String!]) {
+	            organization {
+		            id
+		            clientContractTimeReport(
+			            timeReportDate_bt: $timeReportDate_bt
+			            pagination: { after: $after, first: $first }
+		            ) {
+			            totalCount
+			            edges {
+				            cursor
+				            node {
+					            dateWorkedOn
+					            weekWorkedOn
+					            monthWorkedOn
+					            yearWorkedOn
+					            totalCharges
+					            totalHoursWorked
+					            contract {
+						            id
+					            }
+				            }
+			            }
+		            }
+	            }
+            }
+        """,
+		context = Record.FieldOrDefault(params, "ctx", []), 
+		config = Record.FieldOrDefault(params, "config", []), 
+		defaultPageSize =  Record.FieldOrDefault(config, "defaultPageSize", 50),
+		_first = Record.FieldOrDefault(context, "first", defaultPageSize), 
+        _after = Record.FieldOrDefault(context, "after", "0"),
+		currentDate = DateTime.LocalNow(),
+        lastYear = Date.AddYears(currentDate, -1),
+        defaultStartDateFormatted = DateTime.ToText(lastYear, [Format="yyyy-MM-dd"]),
+        defaultEndDateFormatted = DateTime.ToText(currentDate, [Format="yyyy-MM-dd"]),
+	    _rangeStart = Record.FieldOrDefault(params[ctx], "dateRangeStart", defaultStartDateFormatted),
+	    _rangeEnd   = Record.FieldOrDefault(params[ctx], "dateRangeEnd", defaultEndDateFormatted),
+		_firstVal = if _first > 50 then 50 else _first, //50 for max items per bulk request 
+		_variables = [first = _firstVal, after = _after],
+        _timeReportDate_bt = [rangeStart=_rangeStart, rangeEnd=_rangeEnd],
+		_variables_update = Record.AddField(_variables, "timeReportDate_bt", _timeReportDate_bt),
+		graphqlRequest = [query = _query, variables = _variables_update],
+		Upwork.GraphQLRequest = params[f],
+		Upwork.getNullSafeElement = params[getNullSafeElement], 
+		result = Json.Document(Upwork.GraphQLRequest(graphqlRequest, params[config])),
+		//Value = Upwork.getNullSafeElement(result, "data", "OBJECT"),
+		//organization = Upwork.getNullSafeElement(Value, "organization", "OBJECT"), 
+		//clientContractTimeReport = Upwork.getNullSafeElement(organization, "clientContractTimeReport", "OBJECT"),  
+		//totalCount = Upwork.getNullSafeElement(clientContractTimeReport, "totalCount", ""),
+		Source = Record.AddField(result, "totalCount", 0)
+	in
+		Source
+in 
+	Upwork.QueryContractTimeReport

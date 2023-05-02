@@ -1,0 +1,26 @@
+﻿let Upwork.QueryOffers = (a as any) =>
+    let
+        _query = "query offers($after: String, $first: Int!, $startDatePeriod: [String!], $endDatePeriod: [String!]) {  organization {    id    clientOffers(offerByClientFilter:{commonFilter:{startDatePeriod_bt: $startDatePeriod, endDatePeriod_bt: $endDatePeriod} }, pagination: {after: $after, first: $first}) {      totalCount      edges { cursor node { id title offerCreatedDateTime contract { id job { id classification { category { preferredLabel } } } } offer { id createdUsingBYOFlow job {  id  } } } } } }}",
+		 context = Record.FieldOrDefault(a, "ctx", []), 
+		 config = Record.FieldOrDefault(a, "config", []), 
+		 defaultPageSize =  Record.FieldOrDefault(config, "defaultPageSize", 50),
+		 _first = Record.FieldOrDefault(context, "first", defaultPageSize), 
+         _after = Record.FieldOrDefault(context, "after", "0"),
+		 _startDatePeriod = Record.FieldOrDefault(context, "dateRangeStart", null),
+		_endDatePeriod = Record.FieldOrDefault(context, "dateRangeEnd", null),
+		 _firstVal = if _first > 50 then 50 else _first, //50 for max items per bulk request 
+		_variables = [first = _firstVal, after = _after],
+		_variables_update1 = if _startDatePeriod <> null and _startDatePeriod <> ""  then Record.AddField(_variables, "startDatePeriod", {_startDatePeriod}) else _variables,
+		_variables_update2 = if _endDatePeriod <> null and _endDatePeriod <> "" then Record.AddField(_variables_update1, "endDatePeriod", {_endDatePeriod}) else _variables_update1,
+		graphqlRequest = [query = _query, variables = _variables_update2],
+		Upwork.GraphQLRequest = a[f],
+		result = Json.Document(Upwork.GraphQLRequest(graphqlRequest, a[config])),
+		Value = result[data],
+		organization = Value[organization],
+		clientOffers = organization[clientOffers],
+		totalCount = clientOffers[totalCount],
+		Source = Record.AddField(result, "totalCount", totalCount)
+	in
+		Source
+in 
+	Upwork.QueryOffers

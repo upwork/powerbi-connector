@@ -1,0 +1,16 @@
+let Upwork.QueryTransactionHistory = (params as any) =>
+    let
+	   accountingEntityId = Record.FieldOrDefault(params[ctx], "accountingEntityId", null),
+	   rangeStart = Record.FieldOrDefault(params[ctx], "dateRangeStart", "2010-01-01"),
+	   rangeEnd   = Record.FieldOrDefault(params[ctx], "dateRangeEnd", "2099-12-30"),
+	   _query = "query TransactionHistory {transactionHistory(transactionHistoryFilter:{ aceIds_any:[""" & accountingEntityId & """], transactionDateTime_bt:{rangeStart:""" & rangeStart & """, rangeEnd:""" & rangeEnd & """ } }){ transactionDetail{ transactionHistoryRow { recordId accountingSubtype transactionCreationDate relatedTransactionId fullyPaidDate transactionAmount { rawValue } type relatedAssignment assignmentDeveloperName assignmentCompanyName assignmentTeamUserId } } 	}  }",
+	    graphqlRequest = [query = _query ],
+	   Upwork.GraphQLRequest = params[f],
+	   Source = Json.Document(Upwork.GraphQLRequest(graphqlRequest, params[config])),
+       data = if accountingEntityId <> null then Source else []
+	in
+		data 
+in 
+	Upwork.QueryTransactionHistory
+
+

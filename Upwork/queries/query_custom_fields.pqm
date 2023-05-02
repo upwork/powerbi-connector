@@ -1,0 +1,14 @@
+﻿let Upwork.QueryCustomFields = (params as any) =>
+    let
+		organizationIds = Record.FieldOrDefault(params[ctx], "organizationIds", ""),
+		offset = Record.FieldOrDefault(params[ctx], "offset", 0),
+		limit   = Record.FieldOrDefault(params[ctx], "limit", 1000),
+        _query = "query customFields {customFields(input: {organizationIds: [ """ & organizationIds & """ ]}, offset: " & Number.ToText(offset) & ", limit: " & Number.ToText(limit) & ") {labelSnap displayValueSnap rollupAssignmentId stale}}",
+		graphqlRequest = [query = _query],
+		Upwork.GraphQLRequest = params[f],
+		Source = Json.Document(Upwork.GraphQLRequest(graphqlRequest, params[config])),
+        data = Source
+	in
+		data
+in 
+	Upwork.QueryCustomFields

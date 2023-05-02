@@ -1,0 +1,22 @@
+﻿let Upwork.QueryJobPostings = (a as any) =>
+    let
+        _query = "query jobPosting($first: Int!, $after: String) {organization {jobPosting(jobPostingFilter: {pagination_eq: {first: $first, after:$after}}) {totalCount edges {node {id  ownership{ 	user{ id } 	clientCompany{ id } }   info {publishDateTime company {  name  id }} additionalInfo {directHire}}}}}}",
+		context = Record.FieldOrDefault(a, "ctx", []), 
+		config = Record.FieldOrDefault(a, "config", []), 
+		defaultPageSize =  Record.FieldOrDefault(config, "defaultPageSize", 50),
+		_tempFirst = Record.FieldOrDefault(context, "first", defaultPageSize), 
+		_first = if _tempFirst > 50 then 50 else _tempFirst,
+        _after = Record.FieldOrDefault(context, "after", "0"),
+		variable = [first = _first, after = _after],
+		graphqlRequest = [query = _query, variables = variable],
+		Upwork.GraphQLRequest = a[f],
+		result = Json.Document(Upwork.GraphQLRequest(graphqlRequest, a[config])),
+		Value = result[data],
+		organization = Value[organization],
+		jobPosting = organization[jobPosting],
+		totalCount = jobPosting[totalCount],
+		Source = Record.AddField(result, "totalCount", totalCount)
+	in
+		Source
+in 
+	Upwork.QueryJobPostings

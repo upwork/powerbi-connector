@@ -1,0 +1,20 @@
+﻿let Upwork.QueryGQLSchema = (a as any) =>
+    let
+        _query = "{__schema{queryType{name fields{ name type{fields{name}}}} }}",
+        graphqlRequest = [query = _query],
+		Upwork.GraphQLRequest = a[f],
+		Source = Json.Document(Upwork.GraphQLRequest(graphqlRequest, a[config])),
+        data = Source[data],
+        __schema = data[__schema],
+        queryType = __schema[queryType],
+        fields = queryType[fields],
+        #"Converted to Table" = Table.FromList(fields, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
+        #"Expanded Column1" = Table.ExpandRecordColumn(#"Converted to Table", "Column1", {"name", "type"}, {"Column1.name", "Column1.type"}),
+        #"Expanded Column1.type" = Table.ExpandRecordColumn(#"Expanded Column1", "Column1.type", {"fields"}, {"Column1.type.fields"}),
+        #"Expanded Column1.type.fields" = Table.ExpandListColumn(#"Expanded Column1.type", "Column1.type.fields"),
+        #"Expanded Column1.type.fields1" = Table.ExpandRecordColumn(#"Expanded Column1.type.fields", "Column1.type.fields", {"name"}, {"Column1.type.fields.name"})
+
+	in
+		#"Expanded Column1.type.fields1"
+in 
+	Upwork.QueryGQLSchema
